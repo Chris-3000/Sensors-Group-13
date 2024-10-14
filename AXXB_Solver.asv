@@ -1,0 +1,5 @@
+function [X] = AXXB_Solver(A, B)
+    % sylvester(A, B, C) returns the solution X to AX+XB=C
+    X = sylvester(A, -B, zeros(4,4));
+end
+
