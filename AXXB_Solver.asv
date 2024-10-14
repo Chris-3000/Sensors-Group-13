@@ -1,5 +1,44 @@
 function [X] = AXXB_Solver(A, B)
-    % sylvester(A, B, C) returns the solution X to AX+XB=C
-    X = sylvester(A, -B, zeros(4,4));
+    % A is an array of 4x4 pose matrices, B is the same
+    % X is a 4x4 pose matrix that ideally satisfies the equation AX=XB for 
+    % all A and B
+
+    %% Creation of important local variables
+    n = size(A, 1);
+    R_A = A(1:3, 1:3, :);
+    t_A = A(1:3, 4, :);
+    R_B = B(1:3, 1:3, :);
+    t_B = B(1:3, 4, :);
+    R_X = eye(3);
+
+    %% Calculating best rotation R_X
+    H = zeros(3, 3);
+    for i = 1:n
+        H = H + R_B(:, )
+    end
+
+    [U, ~, V] = svd(H);
+
+    R_X = V * U';
+
+    %% Calculating best translation t_X
+    % R_A * t_X + t_A = R_X * t_B + t_X
+    % (I - R_A) * t_X = t_A - R_X * t_B
+    % t_X = (I - R_A) \ (t_A - R_X * t_B) = C \ d
+    C = zeros(3*n,3);
+    d = zeros(3*n,1);
+
+    for i = 1:n
+        % C = I - R_A
+        C(3*i-2:3*i,:) = eye(3) - R_A(:, :, i);
+
+        % D = t_A - R_X * t_B
+        d(3*i-2:3*i,:) = t_A(:, :, i) - R_X * t_B(:, :, i);
+    end
+
+    t_X = C \ d;
+
+    %% Final answer
+    X = [R_X, t_X; zeros(1,3), 1];
 end
 
