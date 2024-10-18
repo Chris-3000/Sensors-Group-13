@@ -1,0 +1,44 @@
+numImages = 3;
+prefix = "oddboard";
+extension = '.jpg';
+
+filenames = strings(1, numImages);
+for i = 1:numImages
+    filenames(i) = sprintf('%s%d%s', prefix, i, extension);
+end
+
+[imagePoints, boardSize] = detectCheckerboardPoints(filenames);
+
+squareSize = 35; % millimetres
+worldPoints = generateCheckerboardPoints(boardSize, squareSize);
+
+index = 3;
+I = imread(filenames(index));
+imageSize = [size(I, 1), size(I, 2)];
+
+% Now you can use the points for camera calibration
+cameraParams = estimateCameraParameters(imagePoints, worldPoints, ...
+                                        'WorldUnits', 'millimeters', ...
+                                        'ImageSize',imageSize);
+disp(imagePoints);
+disp(worldPoints);
+[rotationMatrix, translationVector] = extrinsics(imagePoints(:,:,index), worldPoints, cameraParams);
+
+disp('Rotation matrix:');
+disp(rotationMatrix);
+disp('Translation vector:');
+disp(translationVector);
+
+% worldPoints3D = [worldPoints, zeros(size(worldPoints, 1), 1)];
+worldPoints3D = [0, 0, 0; squareSize, 0, 0; 0, squareSize, 0; 0, 0, squareSize];
+projectedPoints = worldToImage(cameraParams, rotationMatrix, translationVector, worldPoints3D);
+
+% Display the projected points on the image
+imshow(I);
+hold on;
+quiver(projectedPoints(1,1), ...
+    projectedPoints(2,1)-projectedPoints(1,1), ...
+    projectedPoints(1,2), ...
+    projectedPoints(2,2)-projectedPoints(1,2),);
+% plot(projectedPoints(:,1), projectedPoints(:,2), 'g*');
+
