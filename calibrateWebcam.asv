@@ -1,0 +1,23 @@
+cam = webcam();
+boardSize = [5, 8];
+squareSize = 10; % millimetres
+nPictures = 2;
+imagePoints = zeros((size(boardSize,1)-1)*(size(boardSize,2)-1),2,nPictures);
+
+for i = 1:nPictures
+    disp('Press enter to capture a picture. Ensure that the test pattern is in frame.');
+    pause();
+    img = snapshot(cam);
+    prevPoints = detectCheckerboardPoints(img);
+    % disp(prevPoints);
+    imagePoints(:,:,i) = detectCheckerboardPoints(img);
+end
+
+worldPoints = generateCheckerboardPoints(boardSize, squareSize);
+imageSize = [size(img, 1), size(img, 2)];
+cameraParams = estimateCameraParameters(imagePoints, worldPoints, ...
+                                        'WorldUnits', 'millimetres', ...
+                                        'ImageSize',imageSize);
+
+
+clear('cam');

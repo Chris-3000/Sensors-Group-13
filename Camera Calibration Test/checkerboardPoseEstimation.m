@@ -8,9 +8,11 @@ for i = 1:numImages
 end
 
 [imagePoints, boardSize] = detectCheckerboardPoints(filenames);
+disp(size(imagePoints));
 
 squareSize = 35; % millimetres
 worldPoints = generateCheckerboardPoints(boardSize, squareSize);
+disp(boardSize)
 
 index = 3;
 I = imread(filenames(index));
