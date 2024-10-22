@@ -1,16 +1,21 @@
-cam = webcam();
+function camerawebcamSequence()
+
+cam = webcam(); % specify used webcam
 boardSize = [5, 8];
 squareSize = 10; % millimetres
-nPictures = 2;
-imagePoints = zeros((size(boardSize,1)-1)*(size(boardSize,2)-1),2,nPictures);
+nPictures = 3;
+nPoints = (boardSize(1) - 1) * (boardSize(2) - 1);
+imagePoints = zeros(nPoints,2,nPictures);
+
+preview(cam);
 
 for i = 1:nPictures
     disp('Press enter to capture a picture. Ensure that the test pattern is in frame.');
     pause();
     img = snapshot(cam);
-    prevPoints = detectCheckerboardPoints(img);
-    % disp(prevPoints);
-    imagePoints(:,:,i) = detectCheckerboardPoints(img);
+    detectedPoints = detectCheckerboardPoints(img);
+    disp(size(detectedPoints));
+    imagePoints(:,:,i) = detectedPoints(1:nPoints,:);
 end
 
 worldPoints = generateCheckerboardPoints(boardSize, squareSize);
@@ -19,5 +24,6 @@ cameraParams = estimateCameraParameters(imagePoints, worldPoints, ...
                                         'WorldUnits', 'millimetres', ...
                                         'ImageSize',imageSize);
 
+% save("cameraParams.mat", "cameraParams");
 
 clear('cam');
