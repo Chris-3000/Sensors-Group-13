@@ -50,9 +50,7 @@ classdef FeatureExtraction
             %     % end
             % end
             for i = 1:length(uniqueLabels)
-                if i == 17
-                    scatter(meanPoints(i,1), meanPoints(i,2), 'go')
-                end
+                scatter(meanPoints(i,1), meanPoints(i,2))
             end
             % disp(currentPoint - 1);
             
