@@ -6,7 +6,6 @@ dobot = DobotMagician;
 dobot.useTool = false;
 q0 = ikineDobot(0.2, 0, 0.2);
 % q0 = dobot.model.ikcon(trotx(rand(1)) * troty(rand(1)) * trotz(rand(1)) * transl(0.1*rand(1), 0.1*rand(1), 0.1*rand(1)));
-% q0(4) = 0;
 dobot.model.animate(q0);
 hold on
 axis([-3, 3, -3, 3, 0, 3]);
@@ -35,7 +34,6 @@ for i = 1:poses
     % Record end effector transform relative to base
     q = ikineDobot(0.15, 0.2*(2*rand(1)-1), 0.2*rand(1));
     % q = dobot.model.ikcon(trotx(rand(1)) * troty(rand(1)) * trotz(rand(1)) * transl(0.1*rand(1), 0.1*rand(1), 0.1*rand(1)));
-    % q(4) = 0;
     Tb2e(:,:,i) = dobot.model.fkine(q).T;
 
     % Record pattern transform relative to camera
@@ -63,21 +61,27 @@ disp('Actual Camera Pose: ')
 disp(Tc)
 
 %% Visual Servoing
+
+hold on
 % TDesired = estimatedTc * Tc2p;
 % tDesired = TDesired(1:3,4);
 tDesired = [0.2, 0.2, 0.1];
-qDesired = ikineDobot(tDesired(1), tDesired(2), tDesired(3));
-hold on
 plot3(tDesired(1), tDesired(2), tDesired(3), '*r', 'MarkerSize',20);
 tCurrent = [0.3, -0.1, 0.2];
 qCurrent = ikineDobot(tCurrent(1), tCurrent(2), tCurrent(3));
 dobot.model.animate(qCurrent);
 drawnow
-% pause();
+pause();
+lambda = 0.1;
 steps = 40;
-qMatrix = jtraj(qCurrent, qDesired, steps);
+% qMatrix = jtraj(qCurrent, qDesired, steps);
 for i = 1:steps
-    dobot.model.animate(qMatrix(i,:));
+    % TDesired = estimatedTc * Tc2p;
+    % tDesired = TDesired(1:3,4);
+    tDesired = [0.2, 0.2, 0.1];
+    qDesired = ikineDobot(tDesired(1), tDesired(2), tDesired(3));
+    qCurrent = qCurrent + lambda * (qDesired - qCurrent);
+    dobot.model.animate(qCurrent);
     drawnow
 end
 
