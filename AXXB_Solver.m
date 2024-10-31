@@ -28,6 +28,8 @@ function [X] = AXXB_Solver(A, B)
         B1 = logm(R_B(:, :, i));
 
         % a and b are the unit axes of rotation of A and B respectively
+        % a = [A1(3,2) A1(1,3) A1(2,1)]'; a = a/norm(a); 
+        % b = [B1(3,2) B1(1,3) B1(2,1)]'; b = b/norm(b); 
         a = [A1(3,2) A1(1,3) A1(2,1)]'; a = a/norm(a); 
         b = [B1(3,2) B1(1,3) B1(2,1)]'; b = b/norm(b); 
 
