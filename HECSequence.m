@@ -11,7 +11,7 @@ pause();
 
 
 %% regular params
-cam = webcam(); % specify used webcam
+cam = webcam("Logitech BRIO"); % specify used webcam
 boardSize = [5, 8];
 squareSize = 10; % millimetres
 nPictures = 3;
@@ -37,19 +37,20 @@ dobot = DobotROS();
 
 %% Shenanigans
 for i = 1:nPictures
-    % joint_target = [-0.2 * i,0.4,0.3,0.0];
-    % q = zeros(1,5);
-    % q(1) = joint_target(1);
-    % q(2) = joint_target(2);
-    % q(3) = joint_target(3);
-    % q(4) = pi - q(3) - q(2);
-    % q(5) = joint_target(4);
-    % T_B2E(:,:,i) = dobotSim.model.fkine(q);
-    % dobotSim.model.animate(q);
-    end_effector_position = [0.05 + i * 0.05,-0.1,0.05];
-    end_effector_rotation = [0,0,0];
-    dobot.PublishEndEffectorPose(end_effector_position,end_effector_rotation);
-    T_B2E(:,:,i) = transl(end_effector_position);
+    joint_target = [-0.2 * i,0.4,0.3,0.0];
+    q = zeros(1,5);
+    q(1) = joint_target(1);
+    q(2) = joint_target(2);
+    q(3) = joint_target(3);
+    q(4) = pi - q(3) - q(2);
+    q(5) = joint_target(4);
+    T_B2E(:,:,i) = dobotSim.model.fkine(q);
+    dobotSim.model.animate(q);
+    % end_effector_position = [0.05 + i * 0.05,-0.1,0.05];
+    % end_effector_rotation = [0,0,0];
+   
+    % dobot.PublishEndEffectorPose(end_effector_position,end_effector_rotation);
+    % T_B2E(:,:,i) = transl(end_effector_position);
     % move end effector to desired location
     pause(3);
     img = snapshot(cam);
