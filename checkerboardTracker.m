@@ -1,5 +1,6 @@
-cam = webcam("Logitech BRIO");
-cam.Resolution = '1920x1080';
+% cam = webcam('Logitech BRIO');
+cam = webcam;
+
 % pause(10);
 
 while true
