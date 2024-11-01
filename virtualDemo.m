@@ -9,7 +9,7 @@ q0 = ikineDobot(0.2, 0, 0.2);
 disp(q0)
 dobot.model.animate(q0);
 hold on
-axis([-3, 3, -3, 3, 0, 3]);
+axis([-2, 2, -2, 2, 0, 2]);
 
 %% Initiate camera
 intrinsics = load('cameraParams.mat');
@@ -107,7 +107,62 @@ for i = 1:steps
     qDesired = dobot.model.ikcon(transl(tDesired(1), tDesired(2), tDesired(3)));
     qDesired(4) = pi - qDesired(3) - qDesired(2);
     qCurrent = qCurrent + lambda * (qDesired - qCurrent);
+
+% % TDesired = estimatedTc * Tc2p;
+% % tDesired = TDesired(1:3,4);
+% tDesired = [0.2, 0.2, 0.1];
+% plot3(tDesired(1), tDesired(2), tDesired(3), '*r', 'MarkerSize',20);
+% tCurrent = [0.3, -0.1, 0.2];
+% qCurrent = ikineDobot(tCurrent(1), tCurrent(2), tCurrent(3));
+% dobot.model.animate(qCurrent);
+% drawnow
+% pause();
+% lambda = 0.01;
+% steps = 800;
+% % qMatrix = jtraj(qCurrent, qDesired, steps);
+% for i = 1:steps
+%     % TDesired = estimatedTc * Tc2p;
+%     % tDesired = TDesired(1:3,4);
+%     tDesired = [0.2, 0.2, 0.1];
+%     qDesired = ikineDobot(tDesired(1), tDesired(2), tDesired(3));
+%     qCurrent = qCurrent + lambda * (qDesired - qCurrent);
+%     dobot.model.animate(qCurrent);
+%     drawnow
+% end
+
+
+
+%% Visual Servoing - Refined Movement
+tDesired = [0.2, 0.2, 0.1];
+plot3(tDesired(1), tDesired(2), tDesired(3), '*r', 'MarkerSize', 20);
+tCurrent = [-0.3, -0.1, 0.2];
+qCurrent = ikineDobot(tCurrent(1), tCurrent(2), tCurrent(3));
+dobot.model.animate(qCurrent);
+drawnow;
+
+lambda = 0.02;
+steps = 500;
+
+for i = 1:steps
+    % Calculate the error in task space (position error)
+    error = tDesired - tCurrent;
+
+    % Move current joint configuration toward desired based on lambda
+    delta_q = lambda * (ikineDobot(tDesired(1), tDesired(2), tDesired(3)) - qCurrent);
+    qCurrent = qCurrent + delta_q;
+
+    % Update current end-effector position based on qCurrent
+    tCurrent = transl(dobot.model.fkine(qCurrent).T);
+
+    % Animate the robot and update the display
     dobot.model.animate(qCurrent);
-    drawnow
+    drawnow;
+
+    % Check convergence
+    if norm(error) < 0.01
+        disp('Target position reached');
+        break;
+    end
 end
+
 
