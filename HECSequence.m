@@ -1,12 +1,12 @@
-% %% Reset plot
-% clear all;
-% clc;
-% clf;
-% close all;
-% rosshutdown;
-% 
-% %% Start Dobot Magician Node
-% rosinit('192.168.27.1');
+%% Reset plot
+clear all;
+clc;
+clf;
+close all;
+rosshutdown;
+
+%% Start Dobot Magician Node
+rosinit('192.168.27.1');
 
 %% Start Dobot ROS
 dobot = DobotROS();
@@ -16,7 +16,7 @@ dobotSim = DobotMagician;
 dobotSim.useTool = false;
 q0 = ikineDobot(0.2, 0, 0.2);
 % q0 = dobot.model.ikcon(trotx(rand(1)) * troty(rand(1)) * trotz(rand(1)) * transl(0.1*rand(1), 0.1*rand(1), 0.1*rand(1)));
-disp(q0)
+% disp(q0)
 dobotSim.model.animate(q0);
 hold on
 axis([-3, 3, -3, 3, 0, 3]);
@@ -49,12 +49,16 @@ Tb2e = zeros(4,4,poses);
 % Camera measurements
 for i = 1:poses
     % Record end effector transform relative to base
-    x = 0.15;
-    y = 0.2*(2*rand(1)-1);
-    z = 0.2*rand(1);
-    q = ikineDobot(x, y, z);
-    dobot.PublishEndEffectorPose([x,y,z],zeros(1,3));
-    pause(2);
+    % x = 0.15;
+    % y = 0.2*(2*rand(1)-1);
+    % z = 0.2*rand(1);
+    % x = 0.15 + i * 0.02;
+    % y = i * 0.02;
+    % z = 0.05 + i * 0.02;
+    q = [-0.8 + i * 0.2, 0.4, 0.4, 0];
+    % q = ikineDobot(x, y, z);
+    dobot.PublishTargetJoint(q);
+    % pause(5);
     % q = dobot.model.ikcon(trotx(rand(1)) * troty(rand(1)) * trotz(rand(1)) * transl(0.1*rand(1), 0.1*rand(1), 0.1*rand(1)));
     Tb2e(:,:,i) = dobotSim.model.fkine(q).T;
 
