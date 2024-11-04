@@ -30,11 +30,11 @@ camSim = CentralCamera('focal', mean(cameraParams.FocalLength), ...
     'name', 'Logitech BRIO');
 
 %% Hand-Eye Calibration Parameters
-poses = 6;
+poses = 2;
 Tc2p = zeros(4,4,poses);
 Tb2e = zeros(4,4,poses);
 
-% Camera measurements for multiple poses
+% Camera measurements for two poses
 for i = 1:poses
     % Move Dobot to the specified joint configuration
     q = [-0.8 + i * 0.2, 0.4, 0.4, 0];
@@ -66,13 +66,13 @@ for i = 1:poses
     end
 end
 
-%% Calculate Transformations A and B
-A = zeros(4,4,poses-1);
-B = zeros(4,4,poses-1);
-for i = 1:poses-1
-    A(:,:,i) = Tb2e(:,:,i+1) * inv(Tb2e(:,:,i));
-    B(:,:,i) = Tc2p(:,:,i+1) * inv(Tc2p(:,:,i));
-end
+%% Calculate Transformations A and B (only one set since two poses)
+A = Tb2e(:,:,2) * inv(Tb2e(:,:,1));
+B = Tc2p(:,:,2) * inv(Tc2p(:,:,1));
+
+% Reshape to work with AXXB_Solver as a single-pose input
+A = reshape(A, [4,4,1]);
+B = reshape(B, [4,4,1]);
 
 % Compute hand-eye calibration transformation X
 estimatedTc = AXXB_Solver(A, B);
