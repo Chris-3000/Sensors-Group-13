@@ -65,9 +65,6 @@
 % end
 
 function X = AXXB_Solver(A, B)
-    % Function to solve A*X = X*B using Singular Value Decomposition (SVD)
-    % A and B are 4x4xN matrices, where N is the number of pose pairs
-    
     % Ensure we have at least 3 poses to solve accurately
     numPoses = size(A, 3);
     if numPoses < 3
@@ -93,16 +90,16 @@ function X = AXXB_Solver(A, B)
     end
     
     % Step 2: Calculate the translation part of X
-    % Set up the translation equation: RA * t_X - t_B = t_A
-    tA = zeros(3 * numPoses, 1);
-    tB = zeros(3 * numPoses, 1);
+    % Set up a system of equations for each pose to solve for translation
+    tA = zeros(3, numPoses);
+    tB = zeros(3, numPoses);
     for i = 1:numPoses
-        tA((i-1)*3 + (1:3)) = A(1:3, 4, i);
-        tB((i-1)*3 + (1:3)) = R_X * B(1:3, 4, i);
+        tA(:, i) = A(1:3, 4, i);
+        tB(:, i) = R_X * B(1:3, 4, i);
     end
 
-    % Solve for translation vector
-    t_X = (RA - eye(3 * numPoses)) \ (tA - tB);
+    % Solve for the translation vector by averaging across poses
+    t_X = mean(tA - tB, 2);
 
     % Combine rotation and translation into homogeneous transform
     X = eye(4);
