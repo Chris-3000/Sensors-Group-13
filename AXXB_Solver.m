@@ -65,46 +65,81 @@
 % end
 
 
+% function X = AXXB_Solver(A, B)
+%     % Number of poses
+%     numPoses = size(A, 3);
+% 
+%     % Step 1: Rotation component solving using SVD
+%     RA = [];
+%     RB = [];
+%     for i = 1:numPoses
+%         RA = [RA; A(1:3,1:3,i) - eye(3)];
+%         RB = [RB; B(1:3,1:3,i)];
+%     end
+% 
+%     % SVD solution for rotation
+%     [U,~,V] = svd(RA \ RB); % Solving RX = XB
+%     R_X = U * V';
+% 
+%     % Step 2: Translation component
+%     tA = [];
+%     tB = [];
+%     for i = 1:numPoses
+%         tA = [tA; (A(1:3,1:3,i) - eye(3)) * A(1:3,4,i)];
+%         tB = [tB; B(1:3,4,i)];
+%     end
+%     % Solve translation with least squares
+%     t_X = (RA \ RB) * (tA - tB);
+% 
+%     % Step 3: Form the X transform
+%     X = [R_X, t_X; 0 0 0 1];
+% 
+%     % Iterative refinement for better accuracy
+%     tol = 1e-5;  % Tolerance level for iteration stop
+%     maxIter = 20;
+%     error = inf;
+%     iter = 0;
+%     while error > tol && iter < maxIter
+%         iter = iter + 1;
+%         X_new = X; % Apply residual corrections here if needed
+%         error = norm(X - X_new, 'fro'); % Frobenius norm to measure error
+%         X = X_new;
+%     end
+% 
+%     disp(['Converged after ', num2str(iter), ' iterations with error: ', num2str(error)]);
+% end
+
 function X = AXXB_Solver(A, B)
-    % Number of poses
     numPoses = size(A, 3);
-    
-    % Step 1: Rotation component solving using SVD
-    RA = [];
-    RB = [];
+    RA = zeros(3 * numPoses, 3);
+    RB = zeros(3 * numPoses, 3);
+    tA = zeros(3 * numPoses, 1);
+    tB = zeros(3 * numPoses, 1);
+
     for i = 1:numPoses
-        RA = [RA; A(1:3,1:3,i) - eye(3)];
-        RB = [RB; B(1:3,1:3,i)];
+        RA(3 * i - 2:3 * i, :) = A(1:3, 1:3, i);
+        RB(3 * i - 2:3 * i, :) = B(1:3, 1:3, i);
+        tA(3 * i - 2:3 * i) = A(1:3, 4, i);
+        tB(3 * i - 2:3 * i) = B(1:3, 4, i);
     end
-    
-    % SVD solution for rotation
-    [U,~,V] = svd(RA \ RB); % Solving RX = XB
+
+    % Solve for rotation part RX = XR using SVD
+    [U, ~, V] = svd(RA - RB);
     R_X = U * V';
-
-    % Step 2: Translation component
-    tA = [];
-    tB = [];
-    for i = 1:numPoses
-        tA = [tA; (A(1:3,1:3,i) - eye(3)) * A(1:3,4,i)];
-        tB = [tB; B(1:3,4,i)];
-    end
-    % Solve translation with least squares
-    t_X = (RA \ RB) * (tA - tB);
-
-    % Step 3: Form the X transform
-    X = [R_X, t_X; 0 0 0 1];
-
-    % Iterative refinement for better accuracy
-    tol = 1e-5;  % Tolerance level for iteration stop
-    maxIter = 20;
-    error = inf;
-    iter = 0;
-    while error > tol && iter < maxIter
-        iter = iter + 1;
-        X_new = X; % Apply residual corrections here if needed
-        error = norm(X - X_new, 'fro'); % Frobenius norm to measure error
-        X = X_new;
+    
+    % Ensure rotation matrix is valid
+    if det(R_X) < 0
+        R_X = -R_X;
     end
 
-    disp(['Converged after ', num2str(iter), ' iterations with error: ', num2str(error)]);
+    % Solve for translation using weighted least squares
+    epsilon = 1e-5; % Small regularization parameter
+    W = eye(3 * numPoses) * epsilon; % Regularization for stability
+    t_X = (RA + W) \ (tA - tB);
+
+    % Form the final transformation matrix X
+    X = eye(4);
+    X(1:3, 1:3) = R_X;
+    X(1:3, 4) = t_X(1:3);
 end
+
