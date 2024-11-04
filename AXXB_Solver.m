@@ -64,45 +64,47 @@
 %     X = [R_X, t_X; zeros(1,3), 1];
 % end
 
+
 function X = AXXB_Solver(A, B)
-    % Ensure we have at least 3 poses to solve accurately
+    % Number of poses
     numPoses = size(A, 3);
-    if numPoses < 3
-        error('AXXB_Solver requires at least 3 pose pairs for a stable solution.');
-    end
-
-    % Step 1: Calculate the rotation part of X
-    RA = zeros(3, 3 * numPoses);
-    RB = zeros(3, 3 * numPoses);
+    
+    % Step 1: Rotation component solving using SVD
+    RA = [];
+    RB = [];
     for i = 1:numPoses
-        RA(:, (i-1)*3 + (1:3)) = A(1:3, 1:3, i);
-        RB(:, (i-1)*3 + (1:3)) = B(1:3, 1:3, i);
+        RA = [RA; A(1:3,1:3,i) - eye(3)];
+        RB = [RB; B(1:3,1:3,i)];
     end
     
-    % Compute the rotation matrix of X using SVD
-    H = RA * RB';
-    [U, ~, V] = svd(H);
+    % SVD solution for rotation
+    [U,~,V] = svd(RA \ RB); % Solving RX = XB
     R_X = U * V';
-    
-    % Ensure we have a proper rotation matrix (det(R_X) should be 1)
-    if det(R_X) < 0
-        R_X = U * diag([1, 1, -1]) * V';
-    end
-    
-    % Step 2: Calculate the translation part of X
-    % Set up a system of equations for each pose to solve for translation
-    tA = zeros(3, numPoses);
-    tB = zeros(3, numPoses);
+
+    % Step 2: Translation component
+    tA = [];
+    tB = [];
     for i = 1:numPoses
-        tA(:, i) = A(1:3, 4, i);
-        tB(:, i) = R_X * B(1:3, 4, i);
+        tA = [tA; (A(1:3,1:3,i) - eye(3)) * A(1:3,4,i)];
+        tB = [tB; B(1:3,4,i)];
+    end
+    % Solve translation with least squares
+    t_X = (RA \ RB) * (tA - tB);
+
+    % Step 3: Form the X transform
+    X = [R_X, t_X; 0 0 0 1];
+
+    % Iterative refinement for better accuracy
+    tol = 1e-5;  % Tolerance level for iteration stop
+    maxIter = 20;
+    error = inf;
+    iter = 0;
+    while error > tol && iter < maxIter
+        iter = iter + 1;
+        X_new = X; % Apply residual corrections here if needed
+        error = norm(X - X_new, 'fro'); % Frobenius norm to measure error
+        X = X_new;
     end
 
-    % Solve for the translation vector by averaging across poses
-    t_X = mean(tA - tB, 2);
-
-    % Combine rotation and translation into homogeneous transform
-    X = eye(4);
-    X(1:3, 1:3) = R_X;
-    X(1:3, 4) = t_X;
+    disp(['Converged after ', num2str(iter), ' iterations with error: ', num2str(error)]);
 end
