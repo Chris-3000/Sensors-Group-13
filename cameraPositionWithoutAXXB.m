@@ -18,13 +18,13 @@
 %% Plot dobot in simulation to the same position it is in real life
 dobotSim = DobotMagician();
 dobotSim.useTool = false;
-qSim = [0,0,pi/2,pi/2, 0];
+qSim = [0,0,pi/2,pi/2];
 dobotSim.model.animate(qSim);
 drawnow
 
 hold on
 axis equal
-Tb2e = dobotSim.model.fkine(qSim).T;
+Tb2e = dobotSim.model.fkine(qSim).T *trotz(pi);
 Te2p = transl(0.013,0.03,0.044+0.015) * troty(pi/2) * trotz(-pi/2);
 disp(Tb2e)
 drawnow
