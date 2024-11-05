@@ -1,5 +1,5 @@
-% cam = webcam('Logitech BRIO');
-cam = webcam();
+cam = webcam('Logitech BRIO');
+% cam = webcam();
 
 % pause(10);
 

@@ -1,21 +1,21 @@
-%% Reset everything
-% clear all;
-% clc;
-% clf;
-% close all;
-% rosshutdown;
+% Reset everything
+clear all;
+clc;
+clf;
+close all;
+rosshutdown;
 
-%% Start Dobot Magician Node
-% rosinit('192.168.27.1');
+% Start Dobot Magician Node
+rosinit('192.168.27.1');
 
-%% Start Dobot ROS
-% dobot = DobotROS();
+% Start Dobot ROS
+dobot = DobotROS();
 
-%% Control the real dobot and move it to the expected default position 
-% q = [0,0,0,0];
-% dobot.PublishTargetJoint(q);
+% Control the real dobot and move it to the expected default position 
+q = [0,0,0,0];
+dobot.PublishTargetJoint(q);
 
-%% Plot dobot in simulation to the same position it is in real life
+% Plot dobot in simulation to the same position it is in real life
 dobotSim = DobotMagician();
 dobotSim.useTool = false;
 qSim = [0,0,pi/2,pi/2];
@@ -23,14 +23,14 @@ dobotSim.model.animate(qSim);
 drawnow
 
 hold on
-axis equal
+% axis equal
 Tb2e = dobotSim.model.fkine(qSim).T *trotz(pi);
 Te2p = transl(0.013,0.03,0.044+0.015) * troty(pi/2) * trotz(-pi/2);
 disp(Tb2e)
 drawnow
 
 %% Initiate camera
-cam = webcam();
+cam = webcam('Logitech BRIO');
 Tc2p = zeros(4,4);
 worldPoints = generateCheckerboardPoints([5,8], 10);
 intrinsics = load('cameraParams.mat');
@@ -52,8 +52,8 @@ end
 
 %% Plot camera in simulation where it is estimated to be
 camSim = CentralCamera('focal', mean(cameraParams.FocalLength), ...
-    'resolution', [1920, 1080], ...
-    'centre', [960, 540], ...
+    'resolution', [2560, 1440], ...
+    'centre', [1280, 720], ...
     'name', 'Logitech BRIO');
 camSim.T = Tb2e * Te2p * inv(Tc2p);
 camSim.plot_camera('scale', 0.1);

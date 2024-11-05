@@ -18,15 +18,15 @@ hold on;
 axis([-3, 3, -3, 3, 0, 3]);
 
 %% Initialize Camera and Calibration Parameters
-cam = webcam();
+cam = webcam('Logitech BRIO');
 cameraParams = load('cameraParams.mat');
 cameraParams = cameraParams.cameraParams;
 worldPoints = generateCheckerboardPoints([5,8], 8);
 
 %% Simulation Camera Setup
 camSim = CentralCamera('focal', mean(cameraParams.FocalLength), ...
-    'resolution', [1920, 1080], ...
-    'centre', [960, 540], ...
+    'resolution', [2560, 1440], ...
+    'centre', [1280, 720], ...
     'name', 'Logitech BRIO');
 
 %% Hand-Eye Calibration Parameters
@@ -37,7 +37,7 @@ Tb2e = zeros(4,4,poses);
 % Camera measurements for two poses
 for i = 1:poses
     % Move Dobot to the specified joint configuration
-    q = [-0.8 + i * 0.2, 0.4, 0.4, 0];
+    q = [-0.4 + i * 0.2, 0.4, 0.4, 0];
     dobot.PublishTargetJoint(q);
     pause(2); % Ensure the robot has time to reach the position
 
