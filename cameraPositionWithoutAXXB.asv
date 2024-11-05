@@ -20,12 +20,14 @@ dobotSim = DobotMagician();
 dobotSim.useTool = false;
 qSim = [0,0,pi/2,pi/2, 0];
 dobotSim.model.animate(qSim);
+hold on
+axis equal
 drawnow
 
-hold on
+%% Get 
 Tb2e = dobotSim.model.fkine(qSim).T;
 Te2p = transl(0.013,0.03,0.044+0.015) * troty(pi/2) * trotz(-pi/2);
-disp(Tb2e)
+% disp(Tb2e)
 drawnow
 
 %% Initiate camera
