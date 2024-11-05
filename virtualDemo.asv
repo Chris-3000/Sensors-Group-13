@@ -18,8 +18,8 @@ cam = CentralCamera('focal', mean(intrinsics.FocalLength), ...
     'resolution', [1920, 1080], ...
     'centre', [960, 540], ...
     'name', 'Logitech BRIO');
-% Tc = trotz(0) * transl(2,0,0.3) * trotz(pi/2) * trotx(-pi/2);
-Tc = trotx(rand(1)) * troty(rand(1)) * trotz(rand(1)) * transl(rand(1), rand(1), rand(1));
+Tc = trotz(0) * transl(2,0,0.3) * trotz(pi/2) * trotx(-pi/2);
+% Tc = trotx(rand(1)) * troty(rand(1)) * trotz(rand(1)) * transl(rand(1), rand(1), rand(1));
 
 cam.T = Tc;
 cam.plot_camera('scale', 0.1);
@@ -44,8 +44,7 @@ for i = 1:poses
     % Animate the robot in position
     dobot.model.animate(q);
     drawnow
-    disp(i);
-    pause();
+    
 end
 
 % Estimate transform of camera relative to base
@@ -74,7 +73,7 @@ drawnow;
 pause();
 
 lambda = 0.1;
-steps = 80;
+steps = 400;
 
 for i = 1:steps
     % Calculate the error in task space (position error)

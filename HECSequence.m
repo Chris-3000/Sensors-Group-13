@@ -1,28 +1,28 @@
-%% Reset plot
-clear all;
-clc;
-clf;
-close all;
-rosshutdown;
-
-%% Start Dobot Magician Node
-rosinit('192.168.27.1');
-
-%% Start Dobot ROS
-dobot = DobotROS();
+% %% Reset plot
+% clear all;
+% clc;
+% clf;
+% close all;
+% rosshutdown;
+% 
+% %% Start Dobot Magician Node
+% rosinit('192.168.27.1');
+% 
+% %% Start Dobot ROS
+% dobot = DobotROS();
 
 %% Initiate Dobot Magician Simulation
 dobotSim = DobotMagician;
 dobotSim.useTool = false;
-q0 = ikineDobot(0.2, 0, 0.2);
+% q0 = ikineDobot(0.2, 0, 0.2);
 % q0 = dobot.model.ikcon(trotx(rand(1)) * troty(rand(1)) * trotz(rand(1)) * transl(0.1*rand(1), 0.1*rand(1), 0.1*rand(1)));
 % disp(q0)
-dobotSim.model.animate(q0);
+% dobotSim.model.animate(q0);
 hold on
 axis([-3, 3, -3, 3, 0, 3]);
 
 %% Initiate real camera
-cam = webcam('Logitech BRIO');
+cam = webcam();
 cameraParams = load('cameraParams.mat');
 cameraParams = cameraParams.cameraParams;
 worldPoints = generateCheckerboardPoints([5,8], 8);
