@@ -20,13 +20,19 @@ dobotSim = DobotMagician();
 dobotSim.useTool = false;
 qSim = [0,0,pi/2,pi/2, 0];
 dobotSim.model.animate(qSim);
-drawnow
-
 hold on
 axis equal
+drawnow
+
+%% Get Tb2e and Te2p
 Tb2e = dobotSim.model.fkine(qSim).T;
+
+% What works on Chris' device
 Te2p = transl(0.013,0.03,0.044+0.015) * troty(pi/2) * trotz(-pi/2);
-disp(Tb2e)
+
+% What works on John's device
+% Te2p = trotz(pi) * transl(0,0.03,0.015) * troty(pi/2) * trotz(-pi/2);
+
 drawnow
 
 %% Initiate camera
